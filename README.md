@@ -53,7 +53,7 @@ To install AllPac on your Arch Linux system, follow these steps:
 
 2. Navigate to the AllPac directory:
    ```bash
-   cd allpac
+   cd AllPac
    ```
 
 3. Run the installer script:
@@ -96,7 +96,7 @@ Once installed, you can use AllPac with the following commands:
 
 ## Feedback and Contributions
 
-Feedback, bug reports, and contributions are welcome! Feel free to open issues on the [GitHub repository](https://github.com/yourusername/allpac) or submit pull requests.
+Feedback, bug reports, and contributions are welcome! Feel free to open issues on the [Git repository](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/AllPac/issues) or submit pull requests.
 
 ## License
 
