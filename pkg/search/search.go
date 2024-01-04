@@ -3,12 +3,78 @@ package search
 // This package is responsible for searching various sources for the availability of the requested package
 
 import (
-    "os/exec"
+    "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
     "encoding/json"
+    "io/ioutil"
     "fmt"
-    "net/http"
-    "strings"
+    "os/user"
+	"os/exec"
+    "path/filepath"
+	"strings"
+	"net/http"
 )
+
+// PackageList represents the mapping of installed packages to their sources
+type PackageList map[string]string
+
+// UninstallPackages uninstalls the provided packages
+func UninstallPackages(packageNames []string) error {
+    pkgList, err := readPackageList()
+    if err != nil {
+        return err
+    }
+
+    for _, packageName := range packageNames {
+        source, exists := pkgList[packageName]
+        if !exists {
+            fmt.Printf("Package %s not found in installed packages list\n", packageName)
+            continue
+        }
+
+        switch source {
+        case "pacman":
+            err = packagemanager.UninstallPacmanPackage(packageName)
+        case "snap":
+            err = packagemanager.UninstallSnapPackage(packageName)
+        case "flatpak":
+            err = packagemanager.UninstallFlatpakPackage(packageName)
+        // Add cases for other package managers if necessary
+        default:
+            fmt.Printf("Unknown source for package %s\n", packageName)
+            continue
+        }
+
+        if err != nil {
+            fmt.Printf("Error uninstalling package %s: %v\n", packageName, err)
+        } else {
+            fmt.Printf("Successfully uninstalled package %s\n", packageName)
+        }
+    }
+
+    return nil
+}
+
+// readPackageList reads the package list from the pkg.list file
+func readPackageList() (PackageList, error) {
+    usr, err := user.Current()
+    if err != nil {
+        return nil, fmt.Errorf("error getting current user: %v", err)
+    }
+    pkgListPath := filepath.Join(usr.HomeDir, ".allpac", "pkg.list")
+
+    file, err := ioutil.ReadFile(pkgListPath)
+    if err != nil {
+        return nil, fmt.Errorf("error reading package list file: %v", err)
+    }
+
+    var pkgList PackageList
+    err = json.Unmarshal(file, &pkgList)
+    if err != nil {
+        return nil, fmt.Errorf("error decoding package list: %v", err)
+    }
+
+    return pkgList, nil
+}
 
 // AURResponse represents the structure of the response from AUR RPC
 type AURResponse struct {

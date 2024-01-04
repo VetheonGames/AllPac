@@ -13,12 +13,12 @@ func UpdatePacmanPackages(packageNames ...string) error {
     if len(packageNames) == 0 {
         cmd = exec.Command("sudo", "pacman", "-Syu")
     } else {
-        args := append([]string{"-S", "--noconfirm"}, packageNames...)
-        cmd = exec.Command("sudo", "pacman", args...)
+        args := append([]string{"sudo", "pacman", "-S", "--noconfirm"}, packageNames...)
+        cmd = exec.Command(args[0], args[1:]...)
     }
 
     if output, err := cmd.CombinedOutput(); err != nil {
-        return fmt.Errorf("error updating Pacman packages: %s, %v", output, err)
+        return fmt.Errorf("error updating Pacman packages: %s, %v", string(output), err)
     }
     return nil
 }
