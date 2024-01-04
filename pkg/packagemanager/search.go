@@ -1,9 +1,8 @@
-package search
+package packagemanager
 
 // This package is responsible for searching various sources for the availability of the requested package
 
 import (
-    "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
     "encoding/json"
     "io/ioutil"
     "fmt"
@@ -13,9 +12,6 @@ import (
 	"strings"
 	"net/http"
 )
-
-// PackageList represents the mapping of installed packages to their sources
-type PackageList map[string]string
 
 // UninstallPackages uninstalls the provided packages
 func UninstallPackages(packageNames []string) error {
@@ -33,11 +29,11 @@ func UninstallPackages(packageNames []string) error {
 
         switch source {
         case "pacman":
-            err = packagemanager.UninstallPacmanPackage(packageName)
+            err = UninstallPacmanPackage(packageName)
         case "snap":
-            err = packagemanager.UninstallSnapPackage(packageName)
+            err = UninstallSnapPackage(packageName)
         case "flatpak":
-            err = packagemanager.UninstallFlatpakPackage(packageName)
+            err = UninstallFlatpakPackage(packageName)
         // Add cases for other package managers if necessary
         default:
             fmt.Printf("Unknown source for package %s\n", packageName)
@@ -165,4 +161,53 @@ func parsePacmanOutput(output string) []string {
     }
 
     return packages
+}
+
+// GetPacmanPackageVersion returns the version of a package in the Pacman repositories
+func GetPacmanPackageVersion(packageName string) (string, error) {
+    searchResults, err := SearchPacman(packageName)
+    if err != nil {
+        return "", err
+    }
+
+    for _, result := range searchResults {
+        if strings.Contains(result, packageName) {
+            return extractVersionFromPacmanResult(result), nil
+        }
+    }
+
+    return "", fmt.Errorf("package %s not found in Pacman", packageName)
+}
+
+// extractVersionFromPacmanResult extracts the version from a Pacman search result string
+func extractVersionFromPacmanResult(result string) string {
+    // Assuming the result is in the format "packageName version description"
+    parts := strings.Fields(result)
+    if len(parts) >= 2 {
+        return parts[1] // The second element should be the version
+    }
+    return ""
+}
+
+// fetchAURPackageInfo fetches package information from the AUR
+func fetchAURPackageInfo(packageName string) (*AURPackageInfo, error) {
+    url := fmt.Sprintf("https://aur.archlinux.org/rpc/?v=5&type=info&arg[]=%s", packageName)
+    resp, err := http.Get(url)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+
+    var result struct {
+        Results []AURPackageInfo `json:"results"`
+    }
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, err
+    }
+
+    if len(result.Results) == 0 {
+        return nil, fmt.Errorf("package %s not found in AUR", packageName)
+    }
+
+    return &result.Results[0], nil
 }

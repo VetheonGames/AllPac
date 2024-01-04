@@ -9,7 +9,7 @@ package toolcheck
 import (
     "os/exec"
     "fmt"
-    "pixelridgesoftworks.com/AllPac/pkg/install"
+    "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
 )
 
 // isCommandAvailable checks if a command exists
@@ -33,7 +33,7 @@ func EnsurePacman() error {
 // EnsureSnap ensures that Snap is installed and available
 func EnsureSnap() error {
     if !isCommandAvailable("snap") {
-        return install.InstallSnap()
+        return packagemanager.InstallSnap()
     }
     return nil
 }
@@ -41,7 +41,7 @@ func EnsureSnap() error {
 // EnsureGit ensures that Git is installed and available
 func EnsureGit() error {
     if !isCommandAvailable("git") {
-        return install.InstallGit()
+        return packagemanager.InstallGit()
     }
     return nil
 }
@@ -49,7 +49,7 @@ func EnsureGit() error {
 // EnsureBaseDevel ensures that the base-devel group is installed
 func EnsureBaseDevel() error {
     if !isCommandAvailable("make") { // 'make' is part of base-devel, this is the best method to check
-        return install.InstallBaseDevel()
+        return packagemanager.InstallBaseDevel()
     }
     return nil
 }
@@ -57,7 +57,7 @@ func EnsureBaseDevel() error {
 // EnsureFlatpak ensures that Flatpak is installed and available
 func EnsureFlatpak() error {
     if !isCommandAvailable("flatpak") {
-        return install.InstallFlatpak()
+        return packagemanager.InstallFlatpak()
     }
     return nil
 }
