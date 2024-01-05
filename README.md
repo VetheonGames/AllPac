@@ -56,9 +56,15 @@ To install AllPac on your Arch Linux system, follow these steps:
    cd AllPac
    ```
 
+### IGNORE THIS FOR RIGHT NOW
 3. Run the installer script:
    ```bash
    ./install.sh
+   ```
+
+4. Build the binary (this is temporary while testing is happening)
+   ```bash
+   go build -o allpac
    ```
 
 ## Usage
