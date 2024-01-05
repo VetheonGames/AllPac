@@ -6,6 +6,7 @@ import (
     "os/exec"
     "fmt"
 	"strings"
+	"pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
 // UpdateSnapPackages updates specified Snap packages or all if no specific package is provided
@@ -19,6 +20,7 @@ func UpdateSnapPackages(packageNames ...string) error {
     }
 
     if output, err := cmd.CombinedOutput(); err != nil {
+		logger.Errorf("error updating Snap packages: %s, %v", string(output), err)
         return fmt.Errorf("error updating Snap packages: %s, %v", string(output), err)
     }
     return nil
@@ -28,6 +30,7 @@ func UpdateSnapPackages(packageNames ...string) error {
 func UninstallSnapPackage(packageName string) error {
     cmd := exec.Command("sudo", "snap", "remove", packageName)
     if output, err := cmd.CombinedOutput(); err != nil {
+		logger.Errorf("error uninstalling Snap package: %s, %v", string(output), err)
         return fmt.Errorf("error uninstalling Snap package: %s, %v", string(output), err)
     }
     return nil
@@ -38,6 +41,7 @@ func GetVersionFromSnap(packageName string) (string, error) {
     cmd := exec.Command("snap", "info", packageName)
     output, err := cmd.CombinedOutput()
     if err != nil {
+		logger.Errorf("error getting snap package info: %v", err)
         return "", fmt.Errorf("error getting snap package info: %v", err)
     }
 
@@ -51,5 +55,6 @@ func GetVersionFromSnap(packageName string) (string, error) {
             break
         }
     }
+	logger.Errorf("version not found for snap package: %s", packageName)
     return "", fmt.Errorf("version not found for snap package: %s", packageName)
 }

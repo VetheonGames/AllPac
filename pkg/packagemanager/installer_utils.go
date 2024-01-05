@@ -8,6 +8,7 @@ import (
     "strings"
     "fmt"
 	"encoding/json"
+    "pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
 // extractVersionFromPKGBUILD reads the PKGBUILD file and extracts the package version
@@ -15,6 +16,7 @@ func ExtractVersionFromPKGBUILD(repoDir string) (string, error) {
     pkgbuildPath := filepath.Join(repoDir, "PKGBUILD")
     file, err := os.Open(pkgbuildPath)
     if err != nil {
+        logger.Errorf("An error has occured:", err)
         return "", err
     }
     defer file.Close()
@@ -28,9 +30,11 @@ func ExtractVersionFromPKGBUILD(repoDir string) (string, error) {
     }
 
     if err := scanner.Err(); err != nil {
+        logger.Errorf("An error has occured:", err)
         return "", err
     }
 
+    logger.Errorf("pkgver not found in PKGBUILD")
     return "", fmt.Errorf("pkgver not found in PKGBUILD")
 }
 
@@ -47,6 +51,7 @@ const pkgListFilename = "pkg.list"
 func GetPkgListPath() (string, error) {
     usr, err := user.Current()
     if err != nil {
+        logger.Errorf("error getting current user: %v", err)
         return "", fmt.Errorf("error getting current user: %v", err)
     }
     return filepath.Join(usr.HomeDir, ".allpac", pkgListFilename), nil
@@ -56,6 +61,7 @@ func GetPkgListPath() (string, error) {
 func ReadPackageList() (PackageList, error) {
     pkgListPath, err := GetPkgListPath()
     if err != nil {
+        logger.Errorf("An error has occured:", err)
         return nil, err
     }
 
@@ -64,6 +70,7 @@ func ReadPackageList() (PackageList, error) {
         if os.IsNotExist(err) {
             return PackageList{}, nil // Return an empty list if file doesn't exist
         }
+        logger.Errorf("error opening package list file: %v", err)
         return nil, fmt.Errorf("error opening package list file: %v", err)
     }
     defer file.Close()
@@ -71,6 +78,7 @@ func ReadPackageList() (PackageList, error) {
     var pkgList PackageList
     err = json.NewDecoder(file).Decode(&pkgList)
     if err != nil {
+        logger.Errorf("error decoding package list: %v", err)
         return nil, fmt.Errorf("error decoding package list: %v", err)
     }
 
@@ -81,17 +89,20 @@ func ReadPackageList() (PackageList, error) {
 func writePackageList(pkgList PackageList) error {
     pkgListPath, err := GetPkgListPath()
     if err != nil {
+        logger.Errorf("An error has occured:", err)
         return err
     }
 
     file, err := os.Create(pkgListPath)
     if err != nil {
+        logger.Errorf("error creating package list file: %v", err)
         return fmt.Errorf("error creating package list file: %v", err)
     }
     defer file.Close()
 
     err = json.NewEncoder(file).Encode(pkgList)
     if err != nil {
+        logger.Errorf("error encoding package list: %v", err)
         return fmt.Errorf("error encoding package list: %v", err)
     }
 
@@ -102,6 +113,7 @@ func writePackageList(pkgList PackageList) error {
 func LogInstallation(packageName, source, version string) error {
     pkgList, err := readPackageList()
     if err != nil {
+        logger.Errorf("An error has occured:", err)
         return err
     }
 
@@ -126,6 +138,7 @@ func confirmAction(question string) bool {
         fmt.Printf("%s [Y/n]: ", question)
         response, err := reader.ReadString('\n')
         if err != nil {
+            logger.Errorf("Error reading response: %v", err)
             fmt.Println("Error reading response:", err)
             return false
         }

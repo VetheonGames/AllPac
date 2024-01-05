@@ -10,6 +10,7 @@ import (
     "os/exec"
     "fmt"
     "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
+	"pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
 // isCommandAvailable checks if a command exists
@@ -24,6 +25,7 @@ func isCommandAvailable(name string) bool {
 // EnsurePacman ensures that Pacman is installed and available
 func EnsurePacman() error {
     if !isCommandAvailable("pacman") {
+		logger.Errorf("pacman is not available, which is required for AllPac to function")
         // Pacman should always be available on Arch-based systems, handle this as an error or special case
         return fmt.Errorf("pacman is not available, which is required for AllPac to function")
     }

@@ -6,6 +6,7 @@ import (
     "os/exec"
     "fmt"
 	"strings"
+	"pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
 // UpdateFlatpakPackages updates specified Flatpak packages or all if no specific package is provided
@@ -19,6 +20,7 @@ func UpdateFlatpakPackages(packageNames ...string) error {
     }
 
     if output, err := cmd.CombinedOutput(); err != nil {
+		logger.Errorf("error updating Flatpak packages: %s, %v", output, err)
         return fmt.Errorf("error updating Flatpak packages: %s, %v", output, err)
     }
     return nil
@@ -28,6 +30,7 @@ func UpdateFlatpakPackages(packageNames ...string) error {
 func UninstallFlatpakPackage(packageName string) error {
     cmd := exec.Command("flatpak", "uninstall", "-y", packageName)
     if output, err := cmd.CombinedOutput(); err != nil {
+		logger.Errorf("error uninstalling Flatpak package: %s, %v", output, err)
         return fmt.Errorf("error uninstalling Flatpak package: %s, %v", output, err)
     }
     return nil
@@ -38,6 +41,7 @@ func GetVersionFromFlatpak(applicationID string) (string, error) {
     cmd := exec.Command("flatpak", "info", applicationID)
     output, err := cmd.CombinedOutput()
     if err != nil {
+		logger.Errorf("error getting flatpak package info: %v", err)
         return "", fmt.Errorf("error getting flatpak package info: %v", err)
     }
 
@@ -51,5 +55,6 @@ func GetVersionFromFlatpak(applicationID string) (string, error) {
             break
         }
     }
+	logger.Errorf("version not found for flatpak package: %s", applicationID)
     return "", fmt.Errorf("version not found for flatpak package: %s", applicationID)
 }
