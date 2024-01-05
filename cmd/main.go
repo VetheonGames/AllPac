@@ -8,9 +8,17 @@ import (
     "os"
 	"strings"
     "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
+	"pixelridgesoftworks.com/AllPac/pkg/logger"
+	"path/filepath"
 )
 
 func main() {
+	// Initialize the logger
+	logFilePath := filepath.Join(os.Getenv("HOME"), ".allpac", "logs", "allpac.log")
+	if err := logger.Init(logFilePath); err != nil {
+		// If logger initialization fails, you can choose to exit the program or use the default logger
+		logger.Errorf("Failed to initialize logger: %v", err)
+	}
     // Define flags for different commands
     updateCmd := flag.NewFlagSet("update", flag.ExitOnError)
     installCmd := flag.NewFlagSet("install", flag.ExitOnError)
@@ -32,7 +40,7 @@ func main() {
     case "uninstall":
         handleUninstall(uninstallCmd)
     case "search":
-        handleSearch(searchCmd)
+        handleSearch(searchCmd, os.Args[2:])
 	case "rebuild":
 		handleRebuild(aurRebuildCmd)
 	case "clean-aur":
@@ -155,24 +163,23 @@ func handleUninstall(cmd *flag.FlagSet) {
 }
 
 // handleSearch handles the search command for packages across different package managers
-func handleSearch(cmd *flag.FlagSet) {
-    // Define a flag for the package name
-    packageName := cmd.String("package", "", "Name of the package to search")
-
-    // Parse the command line arguments
-    cmd.Parse(os.Args[2:])
-
+func handleSearch(cmd *flag.FlagSet, args []string) {
     // Check if the package name was provided
-    if *packageName == "" {
+    if len(args) < 1 {
         fmt.Println("You must specify a package name.")
         cmd.Usage()
         return
     }
 
+    // The package name is the first argument
+    packageName := args[0]
+
     // Search in Pacman
-    pacmanResults, err := packagemanager.SearchPacman(*packageName)
+    pacmanResults, err := packagemanager.SearchPacman(packageName)
     if err != nil {
-        fmt.Printf("Error searching in Pacman: %v\n", err)
+        logger.Errorf("Error searching in Pacman: %v", err)
+    } else if len(pacmanResults) == 0 {
+        fmt.Println("Pacman: No results found")
     } else {
         fmt.Println("Pacman Results:")
         for _, result := range pacmanResults {
@@ -181,7 +188,7 @@ func handleSearch(cmd *flag.FlagSet) {
     }
 
     // Search in Snap
-    snapResults, err := packagemanager.SearchSnap(*packageName)
+    snapResults, err := packagemanager.SearchSnap(packageName)
     if err != nil {
         fmt.Printf("Error searching in Snap: %v\n", err)
     } else {
@@ -192,7 +199,7 @@ func handleSearch(cmd *flag.FlagSet) {
     }
 
     // Search in Flatpak
-    flatpakResults, err := packagemanager.SearchFlatpak(*packageName)
+    flatpakResults, err := packagemanager.SearchFlatpak(packageName)
     if err != nil {
         fmt.Printf("Error searching in Flatpak: %v\n", err)
     } else {
@@ -203,7 +210,7 @@ func handleSearch(cmd *flag.FlagSet) {
     }
 
     // Search in AUR
-    aurResults, err := packagemanager.SearchAUR(*packageName)
+    aurResults, err := packagemanager.SearchAUR(packageName)
     if err != nil {
         fmt.Printf("Error searching in AUR: %v\n", err)
     } else {

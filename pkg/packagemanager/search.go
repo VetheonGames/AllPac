@@ -104,10 +104,16 @@ type AURPackage struct {
 func SearchPacman(packageName string) ([]string, error) {
     cmd := exec.Command("pacman", "-Ss", packageName)
     output, err := cmd.CombinedOutput()
-    if err != nil {
-        logger.Errorf("error searching Pacman: %v", err)
+
+    // Check if the error is due to no results found
+    if err != nil && len(output) == 0 {
+        return nil, nil // No results is not an error in this context
+    } else if err != nil {
+        // Other errors are still treated as errors
+        logger.Errorf("Error searching Pacman: %v", err)
         return nil, fmt.Errorf("error searching Pacman: %v", err)
     }
+
     return parsePacmanOutput(string(output)), nil
 }
 
