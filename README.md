@@ -5,7 +5,7 @@
 AllPac is a command-line utility designed to simplify package management on Arch Linux by combining various package managers into one cohesive tool. With AllPac, users can seamlessly interact with packages from the Snap Store, Flatpak, Pacman, and the Arch User Repository (AUR) using a single interface. This eliminates the need to juggle multiple package managers and provides a unified solution for installing, updating, uninstalling, and searching for packages.
 
 ## Features
-
+## NOTE: THIS IS PROBABLY WRONG!!! THE WAY THE FLAGS LIBRARY WORKED CREATED SOME UNINTENDED CLI SYNTAX, THIS WILL ALL BE FIXED ASAP
 ### 1. Unified Package Management
 
 AllPac consolidates package management tasks from different sources, allowing users to handle Snap packages, Flatpaks, Pacman packages, and AUR packages all in one place.
