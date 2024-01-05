@@ -10,6 +10,7 @@ import (
     "pixelridgesoftworks.com/AllPac/pkg/packagemanager"
 	"pixelridgesoftworks.com/AllPac/pkg/logger"
 	"path/filepath"
+    "regexp"
 )
 
 func main() {
@@ -99,28 +100,39 @@ func handleInstall(cmd *flag.FlagSet) {
 
     for _, result := range searchResults {
         fmt.Printf("Searching for package: %s\n", result.PackageName)
-        if len(result.Results) == 0 {
-            fmt.Println("No sources found for package.")
+
+        // Filter for exact matches
+        exactMatches := filterExactMatches(result.PackageName, result.Results)
+
+        if len(exactMatches) == 0 {
+            fmt.Println("No exact matches found for package.")
             continue
         }
 
-        sourceIndex := promptUserForSource(result.Results)
-        if sourceIndex < 0 || sourceIndex >= len(result.Results) {
-            fmt.Println("Invalid selection. Skipping package.")
-            continue
+        var selectedSource string
+        if len(exactMatches) == 1 {
+            // Only one source available, use it automatically
+            selectedSource = exactMatches[0].Source
+        } else {
+            // Multiple sources available, prompt the user to choose
+            sourceIndex := promptUserForSource(exactMatches)
+            if sourceIndex < 0 || sourceIndex >= len(exactMatches) {
+                fmt.Println("Invalid selection. Skipping package.")
+                continue
+            }
+            selectedSource = exactMatches[sourceIndex].Source
         }
 
-        selectedSource := result.Results[sourceIndex].Source
         fmt.Printf("Installing %s from %s...\n", result.PackageName, selectedSource)
 
         switch selectedSource {
-        case "pacman":
+        case "Pacman":
             err = packagemanager.InstallPackagePacman(result.PackageName)
-        case "snap":
+        case "Snap":
             err = packagemanager.InstallPackageSnap(result.PackageName)
-        case "flatpak":
+        case "Flatpak":
             err = packagemanager.InstallPackageFlatpak(result.PackageName)
-        case "aur":
+        case "AUR":
             _, err = packagemanager.CloneAndInstallFromAUR(fmt.Sprintf("https://aur.archlinux.org/%s.git", result.PackageName), false)
         default:
             fmt.Printf("Unknown source for package %s\n", result.PackageName)
@@ -133,6 +145,30 @@ func handleInstall(cmd *flag.FlagSet) {
             fmt.Printf("Package %s installed successfully from %s.\n", result.PackageName, selectedSource)
         }
     }
+}
+
+// filters the search results to include only those with an exact match
+func filterExactMatches(packageName string, sourceResults []packagemanager.SourceResult) []packagemanager.SourceResult {
+    var exactMatches []packagemanager.SourceResult
+    for _, sourceResult := range sourceResults {
+        var filteredResults []string
+        for _, result := range sourceResult.Results {
+            if isExactMatch(packageName, result) {
+                filteredResults = append(filteredResults, result)
+            }
+        }
+        if len(filteredResults) > 0 {
+            exactMatches = append(exactMatches, packagemanager.SourceResult{Source: sourceResult.Source, Results: filteredResults})
+        }
+    }
+    return exactMatches
+}
+
+// checks if the given result string is an exact match for the package name
+func isExactMatch(packageName, result string) bool {
+    pattern := fmt.Sprintf("^%s(?:-\\d+|\\-dev)?(?: - [^ ]+)?", regexp.QuoteMeta(packageName))
+    matched, _ := regexp.MatchString(pattern, result)
+    return matched
 }
 
 // handleUninstall handles the uninstall command for packages
