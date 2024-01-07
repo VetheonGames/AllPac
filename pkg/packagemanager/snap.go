@@ -31,8 +31,8 @@ func UpdateSnapPackages(packageNames ...string) error {
     if len(packageNames) == 0 {
         cmd = exec.Command("sudo", "snap", "refresh")
     } else {
-        args := append([]string{"refresh"}, packageNames...)
-        cmd = exec.Command("sudo", "snap", args...)
+        args := append([]string{"snap", "refresh"}, packageNames...)
+        cmd = exec.Command("sudo", args...)
     }
 
     if output, err := cmd.CombinedOutput(); err != nil {
@@ -58,11 +58,33 @@ func UpdateSnapPackages(packageNames ...string) error {
 
 // UninstallSnapPackage uninstalls a specified Snap package
 func UninstallSnapPackage(packageName string) error {
+    // Read the current package list
+    pkgList, err := ReadPackageList()
+    if err != nil {
+        logger.Errorf("An error has occurred while reading the package list: %v", err)
+        return err
+    }
+
+    // Check if the package is managed by AllPac
+    if _, exists := pkgList[packageName]; !exists {
+        logger.Infof("Package %s not found in the package list, may not be managed by AllPac", packageName)
+        return nil
+    }
+
+    // Uninstalling the Snap package
     cmd := exec.Command("sudo", "snap", "remove", packageName)
     if output, err := cmd.CombinedOutput(); err != nil {
-		logger.Errorf("error uninstalling Snap package: %s, %v", string(output), err)
+        logger.Errorf("error uninstalling Snap package: %s, %v", string(output), err)
         return fmt.Errorf("error uninstalling Snap package: %s, %v", string(output), err)
     }
+
+    // Remove the package from the list after successful uninstallation
+    if err := RemovePackageFromList(packageName); err != nil {
+        logger.Errorf("An error has occurred while removing the package from the list: %v", err)
+        return err
+    }
+
+    logger.Infof("Package %s successfully uninstalled and removed from the package list", packageName)
     return nil
 }
 
