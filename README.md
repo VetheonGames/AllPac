@@ -15,7 +15,7 @@ AllPac consolidates package management tasks from different sources, allowing us
 Easily install packages from various sources with a straightforward installation command. AllPac intelligently recognizes the package type and fetches it from the appropriate repository.
 
 ```bash
-allpac install <package_name> {or a list of packages}
+allpac install
 ```
 
 ### 3. Updater
@@ -23,11 +23,11 @@ allpac install <package_name> {or a list of packages}
 Keep all your installed packages up-to-date with a single command. AllPac checks for updates across different repositories and ensures your system is current.
 
 ```bash
-allpac update {everything/snap/flats/arch/aur}
+allpac update
 ```
 or
 ```bash
-allpac update {package_name}
+allpac update
 ```
 
 ### 4. Uninstaller
@@ -35,7 +35,7 @@ allpac update {package_name}
 Remove packages cleanly and efficiently, regardless of their origin. AllPac ensures a consistent uninstallation process for Snap, Flatpak, Pacman, and AUR packages.
 
 ```bash
-allpac uninstall <package_name> {or a list of packages}
+allpac uninstall
 ```
 
 ### 5. Package Search
@@ -43,7 +43,7 @@ allpac uninstall <package_name> {or a list of packages}
 Quickly find packages across Snap Store, Flatpak, Pacman, and AUR using the integrated search feature.
 
 ```bash
-allpac search <name of a package>
+allpac search
 ```
 
 ## Installation
