@@ -11,6 +11,7 @@ To install AllPac on your Arch Linux system, simply run the following command to
 ```bash
 curl -s https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/install.sh | bash
 ```
+***if you use zsh, replace `bash` at the end of the command above with `zsh`***
 
 ## Features
 
@@ -117,7 +118,7 @@ chmod u+rwx ~/.allpac/bin/allpac-updater.sh
 
 Then run the updater script:
 ```bash
-sh ~/.allpac/bin/allpac-updater.sh
+. ~/.allpac/bin/allpac-updater.sh
 ```
 
 ## Feedback and Contributions
