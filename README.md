@@ -25,6 +25,10 @@ Keep all your installed packages up-to-date with a single command. AllPac checks
 ```bash
 allpac update {everything/snap/flats/arch/aur}
 ```
+or
+```bash
+allpac update {package_name}
+```
 
 ### 4. Uninstaller
 
