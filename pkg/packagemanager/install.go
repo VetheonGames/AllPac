@@ -165,8 +165,15 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
         return "", fmt.Errorf("error changing directory: %v", err)
     }
 
-    // Build the package using makepkg
-    cmdMakePkg := exec.Command("makepkg", "-si", "--noconfirm")
+    // Get the username of the user who invoked sudo
+    sudoUser := os.Getenv("SUDO_USER")
+    if sudoUser == "" {
+        logger.Errorf("cannot determine the non-root user to run makepkg")
+        return "", fmt.Errorf("cannot determine the non-root user to run makepkg")
+    }
+
+    // Build the package using makepkg as the non-root user
+    cmdMakePkg := exec.Command("sudo", "-u", sudoUser, "makepkg", "-si", "--noconfirm")
     if output, err := cmdMakePkg.CombinedOutput(); err != nil {
         logger.Errorf("error building package with makepkg: %s, %v", output, err)
         return "", fmt.Errorf("error building package with makepkg: %s, %v", output, err)
