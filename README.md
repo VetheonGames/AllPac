@@ -25,10 +25,6 @@ Keep all your installed packages up-to-date with a single command. AllPac checks
 ```bash
 allpac update
 ```
-or
-```bash
-allpac update
-```
 
 ### 4. Uninstaller
 
