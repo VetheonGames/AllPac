@@ -6,6 +6,7 @@ package packagemanager
 
 import (
     "fmt"
+    "time"
     "os"
     "os/exec"
     "os/user"
@@ -116,11 +117,30 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
         logger.Warnf("user aborted the action")
         return "", fmt.Errorf("user aborted the action")
     }
+
     // Get the current user's home directory
     usr, err := user.Current()
     if err != nil {
         logger.Errorf("error getting current user: %v", err)
         return "", fmt.Errorf("error getting current user: %v", err)
+    }
+
+    // Determine the name of the package from the repo URL
+    repoName := filepath.Base(repoURL)
+
+    // Remove .git suffix
+    repoName = strings.TrimSuffix(repoName, ".git")
+
+    // Get the current date in YYYYMMDD format
+    currentDate := time.Now().Format("20060102")
+
+    // Define the directory for this specific package clone
+    cloneDir := filepath.Join(usr.HomeDir, ".allpac", "cache", repoName+"-"+currentDate)
+
+    // Ensure the clone directory exists
+    if err := os.MkdirAll(cloneDir, 0755); err != nil {
+        logger.Errorf("error creating clone directory: %v", err)
+        return "", fmt.Errorf("error creating clone directory: %v", err)
     }
 
     // Define the base directory for AllPac cache
@@ -133,18 +153,14 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
     }
 
     // Clone the repository
-    cmdGitClone := exec.Command("git", "clone", repoURL, baseDir)
+    cmdGitClone := exec.Command("git", "clone", repoURL, cloneDir)
     if output, err := cmdGitClone.CombinedOutput(); err != nil {
         logger.Errorf("error cloning AUR repo: %s, %v", output, err)
         return "", fmt.Errorf("error cloning AUR repo: %s, %v", output, err)
     }
 
-    // Determine the name of the created directory (and the package name)
-    repoName := filepath.Base(repoURL)
-    repoDir := filepath.Join(baseDir, repoName)
-
     // Change directory to the cloned repository
-    if err := os.Chdir(repoDir); err != nil {
+    if err := os.Chdir(cloneDir); err != nil {
         logger.Errorf("error changing directory: %v", err)
         return "", fmt.Errorf("error changing directory: %v", err)
     }
@@ -157,7 +173,7 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
     }
 
     // Extract the version from PKGBUILD
-    version, err := ExtractVersionFromPKGBUILD(repoDir)
+    version, err := ExtractVersionFromPKGBUILD(cloneDir)
     if err != nil {
         logger.Errorf("error extracting version from PKGBUILD: %v", err)
         return "", fmt.Errorf("error extracting version from PKGBUILD: %v", err)
