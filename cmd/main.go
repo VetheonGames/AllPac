@@ -3,7 +3,6 @@ package main
 // This file is our main entrypoint, and build point for AllPac
 
 import (
-    "flag"
     "fmt"
     "os"
 	"strings"
@@ -21,40 +20,40 @@ func main() {
         logger.Errorf("Failed to initialize logger: %v", err)
     }
 
-    // Define flag sets for different commands
-    commandHandlers := map[string]func(*flag.FlagSet){
-        "update":     handleUpdate,
-        "install":    handleInstall,
-        "uninstall":  handleUninstall,
-        "search":     func(cmd *flag.FlagSet) { handleSearch(cmd, os.Args[2:]) },
-        "rebuild":    handleRebuild,
-        "clean-aur":  handleCleanAur,
-        "toolcheck":  handleToolCheck,
-    }
-
     if len(os.Args) < 2 {
         fmt.Println("Expected 'update', 'install', 'uninstall', 'search', 'rebuild', 'clean-aur', or 'toolcheck' subcommands")
         os.Exit(1)
     }
 
-    if handler, ok := commandHandlers[os.Args[1]]; ok {
-        cmd := flag.NewFlagSet(os.Args[1], flag.ExitOnError)
-        handler(cmd)
-    } else {
-        fmt.Printf("Unknown subcommand: %s\n", os.Args[1])
+    command := os.Args[1]
+    args := os.Args[2:]
+
+    switch command {
+    case "update":
+        handleUpdate(args)
+    case "install":
+        handleInstall(args)
+    case "uninstall":
+        handleUninstall(args)
+    case "search":
+        handleSearch(args)
+    case "rebuild":
+        handleRebuild(args)
+    case "clean-aur":
+        handleCleanAur(args)
+    case "toolcheck":
+        handleToolCheck(args)
+    default:
+        fmt.Printf("Unknown subcommand: %s\n", command)
         os.Exit(1)
     }
 }
 
-func handleUpdate(cmd *flag.FlagSet) {
-    updateFlags := map[string]*bool{
-        "everything": cmd.Bool("everything", false, "Update all packages on the system"),
-        "snap":       cmd.Bool("snap", false, "Update all Snap packages"),
-        "aur":        cmd.Bool("aur", false, "Update all AUR packages"),
-        "arch":       cmd.Bool("arch", false, "Update all Arch packages"),
-        "flats":      cmd.Bool("flats", false, "Update all Flatpak packages"),
+func handleUpdate(args []string) {
+    if len(args) == 0 {
+        fmt.Println("You must specify an update option: 'everything', 'snap', 'aur', 'arch', 'flats', or a specific package name.")
+        return
     }
-    cmd.Parse(os.Args[2:])
 
     updateFuncs := map[string]func() error{
         "everything": packagemanager.UpdateAllPackages,
@@ -64,33 +63,33 @@ func handleUpdate(cmd *flag.FlagSet) {
         "flats":      func() error { return packagemanager.UpdateFlatpakPackages() },
     }
 
-    for flagName, flagValue := range updateFlags {
-        if *flagValue {
-            if updateFunc, ok := updateFuncs[flagName]; ok {
-                if err := updateFunc(); err != nil {
-                    fmt.Printf("Error occurred during '%s' update: %v\n", flagName, err)
-                }
-                return
-            }
-        }
+    updateOption := args[0]
+    if updateFunc, ok := updateFuncs[updateOption]; ok {
+        err := updateFunc()
+        handleUpdateError(updateOption, err)
+    } else {
+        err := packagemanager.UpdatePackageByName(updateOption)
+        handleUpdateError(updateOption, err)
     }
-
-    fmt.Println("No update option specified or unrecognized option")
 }
 
 // handles the install command for packages
-func handleInstall(cmd *flag.FlagSet) {
-    packageNames := cmd.String("packages", "", "Comma-separated list of packages to install")
-    cmd.Parse(os.Args[2:])
-
-    if *packageNames == "" {
+func handleInstall(args []string) {
+    if len(args) == 0 {
         fmt.Println("You must specify at least one package name.")
-        cmd.Usage()
         return
     }
 
-    packages := strings.Split(*packageNames, ",")
-    searchResults, err := packagemanager.SearchAllSources(packages)
+    // Join the args to form a single string, then split by comma
+    packagesInput := strings.Join(args, " ")
+    packageNames := strings.Split(packagesInput, ",")
+
+    // Trim whitespace from each package name
+    for i, pkg := range packageNames {
+        packageNames[i] = strings.TrimSpace(pkg)
+    }
+
+    searchResults, err := packagemanager.SearchAllSources(packageNames)
     if err != nil {
         fmt.Printf("Error searching for packages: %v\n", err)
         return
@@ -118,6 +117,16 @@ func handleInstall(cmd *flag.FlagSet) {
         selectedSource := getSelectedSource(exactMatches)
         if selectedSource == "" {
             continue
+        }
+
+        // Display the actual package name that will be installed
+        fmt.Printf("Available package(s) for installation from %s:\n", selectedSource)
+        for _, match := range exactMatches {
+            if match.Source == selectedSource {
+                for _, pkg := range match.Results {
+                    fmt.Println(pkg)
+                }
+            }
         }
 
         fmt.Printf("Installing %s from %s...\n", result.PackageName, selectedSource)
@@ -171,21 +180,23 @@ func isExactMatch(packageName, result string) bool {
 }
 
 // handles the uninstall command for packages
-func handleUninstall(cmd *flag.FlagSet) {
-    packageNames := cmd.String("packages", "", "Comma-separated list of packages to uninstall")
-
-    cmd.Parse(os.Args[2:])
-
-    if *packageNames == "" {
+func handleUninstall(args []string) {
+    if len(args) == 0 {
         fmt.Println("You must specify at least one package name.")
-        cmd.Usage()
         return
     }
 
-    packages := strings.Split(*packageNames, ",")
+    // Join the args to form a single string, then split by comma
+    packagesInput := strings.Join(args, " ")
+    packageNames := strings.Split(packagesInput, ",")
+
+    // Trim whitespace from each package name
+    for i, pkg := range packageNames {
+        packageNames[i] = strings.TrimSpace(pkg)
+    }
 
     // Call the function to uninstall the packages
-    err := packagemanager.UninstallPackages(packages)
+    err := packagemanager.UninstallPackages(packageNames)
     if err != nil {
         fmt.Printf("Error uninstalling packages: %v\n", err)
     } else {
@@ -194,10 +205,9 @@ func handleUninstall(cmd *flag.FlagSet) {
 }
 
 // handles the search command for packages across different package managers
-func handleSearch(cmd *flag.FlagSet, args []string) {
+func handleSearch(args []string) {
     if len(args) < 1 {
         fmt.Println("You must specify a package name.")
-        cmd.Usage()
         return
     }
 
@@ -232,30 +242,41 @@ func handleSearch(cmd *flag.FlagSet, args []string) {
 }
 
 // handles the rebuild command for an AUR package
-func handleRebuild(cmd *flag.FlagSet) {
-    packageName := cmd.String("package", "", "Name of the AUR package to rebuild")
-
-    cmd.Parse(os.Args[2:])
-
-    if *packageName == "" {
-        fmt.Println("You must specify a package name.")
-        cmd.Usage()
+func handleRebuild(args []string) {
+    if len(args) == 0 {
+        fmt.Println("You must specify the name of an AUR package to rebuild.")
         return
     }
 
-    err := packagemanager.RebuildAndReinstallAURPackage(*packageName)
+    packageName := args[0]
+
+    pkgList, err := packagemanager.ReadPackageList()
     if err != nil {
-        fmt.Printf("Error rebuilding package %s: %v\n", *packageName, err)
+        fmt.Printf("Error reading package list: %v\n", err)
+        return
+    }
+
+    if _, exists := pkgList[packageName]; !exists {
+        fmt.Printf("Package %s is not managed by AllPac or not installed.\n", packageName)
+        return
+    }
+
+    cacheDir := filepath.Join(os.Getenv("HOME"), ".allpac", "cache", packageName)
+    if err := os.RemoveAll(cacheDir); err != nil {
+        fmt.Printf("Error removing old build directory: %v\n", err)
+        return
+    }
+
+    err = packagemanager.RebuildAndReinstallAURPackage(packageName)
+    if err != nil {
+        fmt.Printf("Error rebuilding package %s: %v\n", packageName, err)
     } else {
-        fmt.Printf("Package %s rebuilt and reinstalled successfully.\n", *packageName)
+        fmt.Printf("Package %s rebuilt and reinstalled successfully.\n", packageName)
     }
 }
 
 // handles the cleaning of AUR cache
-func handleCleanAur(cmd *flag.FlagSet) {
-    // Parse the command flags if needed
-    cmd.Parse(os.Args[2:])
-
+func handleCleanAur(args []string) {
     // Call the function to clear the AUR cache
     err := packagemanager.ClearAllPacCache()
     if err != nil {
@@ -277,7 +298,7 @@ func promptUserForSource(sources []packagemanager.SourceResult) int {
     return choice
 }
 
-func handleToolCheck(cmd *flag.FlagSet) {
+func handleToolCheck(args []string) {
     checks := []struct {
         Name string
         Func func() error

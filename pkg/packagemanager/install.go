@@ -9,6 +9,7 @@ import (
     "os"
     "os/exec"
     "os/user"
+    "strings"
     "path/filepath"
     "pixelridgesoftworks.com/AllPac/pkg/logger"
 )
@@ -37,14 +38,35 @@ func InstallPackagePacman(packageName string) error {
 // InstallPackageSnap installs a package using Snap and logs the installation
 func InstallPackageSnap(packageName string) error {
     cmd := exec.Command("sudo", "snap", "install", packageName)
-    if output, err := cmd.CombinedOutput(); err != nil {
-        logger.Errorf("error installing package with Snap: %s, %v", output, err)
-        return fmt.Errorf("error installing package with Snap: %s, %v", output, err)
+    output, err := cmd.CombinedOutput()
+
+    if err != nil {
+        outputStr := string(output)
+        logger.Errorf("error installing package with Snap: %s, %v", outputStr, err)
+
+        // Check if the error is due to the need for classic confinement
+        if strings.Contains(outputStr, "using classic") {
+            fmt.Println("This package requires installation in classic mode, which may perform arbitrary system changes outside of the security sandbox. Do you want to proceed? (yes/no)")
+            var response string
+            fmt.Scanln(&response)
+            if strings.ToLower(response) == "yes" {
+                // Retry installation with --classic flag
+                classicCmd := exec.Command("sudo", "snap", "install", "--classic", packageName)
+                if classicOutput, classicErr := classicCmd.CombinedOutput(); classicErr != nil {
+                    logger.Errorf("error installing package with Snap in classic mode: %s, %v", classicOutput, classicErr)
+                    return fmt.Errorf("error installing package with Snap in classic mode: %s, %v", classicOutput, classicErr)
+                }
+            } else {
+                return fmt.Errorf("installation aborted by user")
+            }
+        } else {
+            return fmt.Errorf("error installing package with Snap: %s, %v", outputStr, err)
+        }
     }
 
     version, err := GetVersionFromSnap(packageName)
     if err != nil {
-        logger.Errorf("An error has occured:", err)
+        logger.Errorf("An error has occurred:", err)
         return err
     }
 

@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"io"
     "log"
     "os"
     "path/filepath"
@@ -21,7 +20,6 @@ func Init(logFilePath string) error {
     }
 
     Logger = log.New(logFile, "AllPac: ", log.Ldate|log.Ltime|log.Lshortfile)
-    Logger.SetOutput(io.MultiWriter(os.Stderr, logFile))
 
     return nil
 }
