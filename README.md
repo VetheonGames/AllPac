@@ -88,6 +88,19 @@ Once installed, you can use AllPac with the following commands:
   allpac search <package_name>
   ```
 
+## Logs and Cache
+
+After you run things the first time (or you run the install script), all the logs, the package list, the binary, and the updater script will be contained here:
+```bash
+/home/{your_user}/.allpac/
+```
+
+## Uninstalling AllPac
+
+To uninstall AllPac is quite simple. You simple remove the `.allpac` directory. As the directory contains all the files associated with AllPac, removing the directory will completely remove AllPac.
+
+### NOTE: UNINSTALLING AllPac WILL *NOT* UNINSTALL PACKAGES INSTALLED *BY* AllPac!
+
 ## Feedback and Contributions
 
 Feedback, bug reports, and contributions are welcome! Feel free to open issues on the [Git repository](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/AllPac/issues) or submit pull requests.
