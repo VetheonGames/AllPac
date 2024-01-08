@@ -48,7 +48,7 @@ func UpdatePacmanPackages(packageNames ...string) error {
     }
 
     if len(packagesToUpdate) > 0 {
-        args := append([]string{"sudo", "pacman", "-S", "--noconfirm"}, packagesToUpdate...)
+        args := append([]string{"sudo", "pacman", "-Syu", "--noconfirm"}, packagesToUpdate...)
         cmd := exec.Command(args[0], args[1:]...)
         if output, err := cmd.CombinedOutput(); err != nil {
             logger.Errorf("error updating Pacman packages: %s, %v", string(output), err)

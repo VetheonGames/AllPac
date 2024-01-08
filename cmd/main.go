@@ -45,6 +45,8 @@ func main() {
         handleToolCheck(args)
     case "version":
         handleVersion(args)
+    case "repair":
+        handleRepair(args)
     default:
         fmt.Printf("Unknown subcommand: %s\n", command)
         os.Exit(1)
@@ -55,6 +57,11 @@ func handleUpdate(args []string) {
     if len(args) == 0 {
         fmt.Println("You must specify an update option: 'everything', 'snaps', 'aur', 'arch', 'flats', or a specific package name.")
         return
+    }
+
+    _, err := packagemanager.ReadPackageList()
+    if err != nil {
+        fmt.Printf("error reading package list. Consider running 'allpac repair': %v", err)
     }
 
     updateFuncs := map[string]func() error{

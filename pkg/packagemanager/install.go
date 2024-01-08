@@ -14,9 +14,9 @@ import (
     "pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
-// InstallPackagePacman installs a package using Pacman and logs the installation
+// installs a package using Pacman and logs the installation
 func InstallPackagePacman(packageName string) error {
-    cmd := exec.Command("sudo", "pacman", "-S", "--noconfirm", packageName)
+    cmd := exec.Command("sudo", "pacman", "-Syu", "--noconfirm", packageName)
     if output, err := cmd.CombinedOutput(); err != nil {
         logger.Errorf("error installing package with Pacman: %s, %v", output, err)
         return fmt.Errorf("error installing package with Pacman: %s, %v", output, err)
@@ -35,7 +35,7 @@ func InstallPackagePacman(packageName string) error {
     return nil
 }
 
-// InstallPackageSnap installs a package using Snap and logs the installation
+// installs a package using Snap and logs the installation
 func InstallPackageSnap(packageName string) error {
     cmd := exec.Command("sudo", "snap", "install", packageName)
     output, err := cmd.CombinedOutput()
@@ -77,7 +77,7 @@ func InstallPackageSnap(packageName string) error {
     return nil
 }
 
-// InstallPackageFlatpak installs a package using Flatpak and logs the installation
+// installs a package using Flatpak and logs the installation
 func InstallPackageFlatpak(packageName string) error {
     cmd := exec.Command("flatpak", "install", "-y", packageName)
     if output, err := cmd.CombinedOutput(); err != nil {
@@ -98,14 +98,19 @@ func InstallPackageFlatpak(packageName string) error {
     return nil
 }
 
-// cloneAndInstallFromAUR clones the given AUR repository and installs it
+// clones the given AUR repository and installs it
 func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, error) {
-    // Request root permissions
-    if !skipConfirmation && !requestRootPermissions() {
-        logger.Warnf("root permissions denied")
-        return "", fmt.Errorf("root permissions denied")
+    // System update
+    if !skipConfirmation && !confirmAction("Do you want to update the system before proceeding? (skipping this step may result in partial updates, and break your system)") {
+        logger.Warnf("user aborted the system update")
+        return "", fmt.Errorf("user aborted the system update")
     }
 
+    cmdUpdate := exec.Command("sudo", "pacman", "-Syu", "--noconfirm")
+    if output, err := cmdUpdate.CombinedOutput(); err != nil {
+        logger.Errorf("error updating system: %s, %v", output, err)
+        return "", fmt.Errorf("error updating system: %s, %v", output, err)
+    }
     // Confirm before proceeding with each step
     if !skipConfirmation && !confirmAction("Do you want to download and build package from " + repoURL + "?") {
         logger.Warnf("user aborted the action")
@@ -172,7 +177,7 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
     return version, nil
 }
 
-// InstallSnap installs Snap manually from the AUR
+// installs Snap manually from the AUR
 func InstallSnap() error {
     version, err := CloneAndInstallFromAUR("https://aur.archlinux.org/snapd.git", true)
     if err != nil {
@@ -187,7 +192,7 @@ func InstallSnap() error {
     return nil
 }
 
-// InstallGit installs Git using Pacman
+// installs Git using Pacman
 func InstallGit() error {
     if err := InstallPackagePacman("git"); err != nil {
         logger.Errorf("error installing Git: %v", err)
@@ -196,7 +201,7 @@ func InstallGit() error {
     return nil
 }
 
-// InstallBaseDevel installs the base-devel group using Pacman
+// installs the base-devel group using Pacman
 func InstallBaseDevel() error {
     if err := InstallPackagePacman("base-devel"); err != nil {
         logger.Errorf("error installing base-devel: %v", err)
@@ -205,7 +210,7 @@ func InstallBaseDevel() error {
     return nil
 }
 
-// InstallFlatpak installs the Flatpak package using Pacman
+// installs the Flatpak package using Pacman
 func InstallFlatpak() error {
     if err := InstallPackagePacman("flatpak"); err != nil {
         logger.Errorf("error installing flatpak: %v", err)

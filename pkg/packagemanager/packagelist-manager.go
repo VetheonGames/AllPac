@@ -41,7 +41,7 @@ func GetPkgListPath() (string, error) {
     if _, err := os.Stat(pkgListPath); os.IsNotExist(err) {
         logger.Infof("pkg.list file does not exist, initializing: %s", pkgListPath)
         // Create and initialize the file if it doesn't exist
-        if err := initializePkgListFile(pkgListPath); err != nil {
+        if err := InitializePkgListFile(pkgListPath); err != nil {
             return "", err // Error already logged in initializePkgListFile
         }
     } else if err != nil {
@@ -55,7 +55,7 @@ func GetPkgListPath() (string, error) {
 }
 
 // creates a new pkg.list file with an empty JSON object
-func initializePkgListFile(filePath string) error {
+func InitializePkgListFile(filePath string) error {
     file, err := os.Create(filePath)
     if err != nil {
         logger.Errorf("error creating package list file: %v", err)

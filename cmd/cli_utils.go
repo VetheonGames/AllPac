@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"embed"
+	"fmt"
 	"io/fs"
+
 	"pixelridgesoftworks.com/AllPac/pkg/logger"
+	"pixelridgesoftworks.com/AllPac/pkg/packagemanager"
 )
 
 func handleUpdateError(updateOption string, err error) {
@@ -24,4 +26,14 @@ func handleVersion(args []string) {
         logger.Errorf("Error reading version file: %v", err)
     }
     fmt.Println(string(content))
+}
+
+func handleRepair(args []string) {
+    // Assuming GetPkgListPath() returns a string path
+    pkgListPath, _ := packagemanager.GetPkgListPath()
+
+    err :=packagemanager.InitializePkgListFile(pkgListPath)
+    if err != nil {
+        logger.Errorf("Error initializing version file: %v", err)
+    }
 }
