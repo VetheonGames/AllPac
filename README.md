@@ -105,7 +105,7 @@ To uninstall AllPac is quite simple. You just remove the `.allpac` directory. As
 
 If you used the Installer Script, updating is easy. Just run `allpac-update-system`.
 
-If you did *NOT* use the Installer Script, updating is stil super easy. Just use `wget` to pull down the [updater script](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/update.sh):
+If you did *NOT* use the Installer Script, updating is still super easy. Just use `wget` to pull down the [updater script](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/update.sh):
 ```bash
 wget -O ~/.allpac/bin/allpac-updater.sh "https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/update.sh"
 ```
