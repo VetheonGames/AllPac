@@ -43,6 +43,8 @@ func main() {
         handleCleanAur(args)
     case "toolcheck":
         handleToolCheck(args)
+    case "version":
+        handleVersion(args)
     default:
         fmt.Printf("Unknown subcommand: %s\n", command)
         os.Exit(1)

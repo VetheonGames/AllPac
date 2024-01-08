@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"embed"
+	"io/fs"
+	"pixelridgesoftworks.com/AllPac/pkg/logger"
 )
 
 func handleUpdateError(updateOption string, err error) {
@@ -10,4 +13,15 @@ func handleUpdateError(updateOption string, err error) {
     } else {
         fmt.Printf("Update '%s' completed successfully.\n", updateOption)
     }
+}
+
+//go:embed .version
+var versionFS embed.FS
+
+func handleVersion(args []string) {
+    content, err := fs.ReadFile(versionFS, ".version")
+    if err != nil {
+        logger.Errorf("Error reading version file: %v", err)
+    }
+    fmt.Println(string(content))
 }

@@ -5,7 +5,7 @@
 AllPac is a command-line utility designed to simplify package management on Arch Linux by combining various package managers into one cohesive tool. With AllPac, users can seamlessly interact with packages from the Snap Store, Flatpak, Pacman, and the Arch User Repository (AUR) using a single interface. This eliminates the need to juggle multiple package managers and provides a unified solution for installing, updating, uninstalling, and searching for packages.
 
 ## Features
-## NOTE: THIS IS PROBABLY WRONG!!! THE WAY THE FLAGS LIBRARY WORKED CREATED SOME UNINTENDED CLI SYNTAX, THIS WILL ALL BE FIXED ASAP
+
 ### 1. Unified Package Management
 
 AllPac consolidates package management tasks from different sources, allowing users to handle Snap packages, Flatpaks, Pacman packages, and AUR packages all in one place.
@@ -15,7 +15,7 @@ AllPac consolidates package management tasks from different sources, allowing us
 Easily install packages from various sources with a straightforward installation command. AllPac intelligently recognizes the package type and fetches it from the appropriate repository.
 
 ```bash
-allpac install <package_name>
+allpac install <package_name> {or a list of packages}
 ```
 
 ### 3. Updater
@@ -23,7 +23,7 @@ allpac install <package_name>
 Keep all your installed packages up-to-date with a single command. AllPac checks for updates across different repositories and ensures your system is current.
 
 ```bash
-allpac update
+allpac update {everything/snap/flats/arch/aur}
 ```
 
 ### 4. Uninstaller
@@ -31,7 +31,7 @@ allpac update
 Remove packages cleanly and efficiently, regardless of their origin. AllPac ensures a consistent uninstallation process for Snap, Flatpak, Pacman, and AUR packages.
 
 ```bash
-allpac uninstall <package_name>
+allpac uninstall <package_name> {or a list of packages}
 ```
 
 ### 5. Package Search
@@ -39,33 +39,15 @@ allpac uninstall <package_name>
 Quickly find packages across Snap Store, Flatpak, Pacman, and AUR using the integrated search feature.
 
 ```bash
-allpac search <query>
+allpac search <name of a package>
 ```
 
 ## Installation
 
-To install AllPac on your Arch Linux system, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://git.pixelridgesoftworks.com/PixelRidge-Softworks/AllPac.git
-   ```
-
-2. Navigate to the AllPac directory:
-   ```bash
-   cd AllPac
-   ```
-
-### IGNORE THIS FOR RIGHT NOW
-3. ~~Run the installer script:~~
-   ~~```bash~~
-   ~~./install.sh~~
-   ~~```~~
-
-Build the binary (this is temporary while testing is happening)
-   ```bash
-   go build -o allpac
-   ```
+To install AllPac on your Arch Linux system, simply run the following command to run the install script [Source](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/src/branch/main/allpac):
+```bash
+curl -s https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/install.sh | bash
+```
 
 ## Usage
 
@@ -77,8 +59,9 @@ Once installed, you can use AllPac with the following commands:
   ```
 
 - Update all installed packages:
+  ### WARNING: This will attempt to install all packages managed by AllPac across all sources! Be careful with this command!
   ```bash
-  allpac update
+  allpac update everything
   ```
 
 - Update a specific installed package or packages:
@@ -86,6 +69,7 @@ Once installed, you can use AllPac with the following commands:
   allpac update {package_name}
   ```
   or
+
   ```bash
   allpac update {packagename1} {packagename2} {packagename3}
   ```
@@ -97,7 +81,7 @@ Once installed, you can use AllPac with the following commands:
 
 - Search for packages:
   ```bash
-  allpac search <query>
+  allpac search <package_name>
   ```
 
 ## Feedback and Contributions
