@@ -53,13 +53,13 @@ func main() {
 
 func handleUpdate(args []string) {
     if len(args) == 0 {
-        fmt.Println("You must specify an update option: 'everything', 'snap', 'aur', 'arch', 'flats', or a specific package name.")
+        fmt.Println("You must specify an update option: 'everything', 'snaps', 'aur', 'arch', 'flats', or a specific package name.")
         return
     }
 
     updateFuncs := map[string]func() error{
         "everything": packagemanager.UpdateAllPackages,
-        "snap":       func() error { return packagemanager.UpdateSnapPackages() },
+        "snaps":       func() error { return packagemanager.UpdateSnapPackages() },
         "aur":        func() error { return packagemanager.UpdateAURPackages() },
         "arch":       func() error { return packagemanager.UpdatePacmanPackages() },
         "flats":      func() error { return packagemanager.UpdateFlatpakPackages() },

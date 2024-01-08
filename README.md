@@ -69,9 +69,12 @@ Once installed, you can use AllPac with the following commands:
   allpac update {package_name}
   ```
   or
-
   ```bash
   allpac update {packagename1} {packagename2} {packagename3}
+  ```
+  or
+  ```bash
+  allpac update {aur/flats/snaps/arch}
   ```
 
 - Uninstall a package:
