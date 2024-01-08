@@ -7,6 +7,10 @@ import (
     "strings"
     "fmt"
     "pixelridgesoftworks.com/AllPac/pkg/logger"
+    "os/exec"
+    "os/user"
+    "strconv"
+    "syscall"
 )
 
 // reads the PKGBUILD file and extracts the package version
@@ -55,4 +59,33 @@ func confirmAction(question string) bool {
             return false
         }
     }
+}
+
+// this is unused, just incase I need to do it this way since makepkg is being a pain in the neck
+func RunMakepkgAsUser(username string) error {
+    // Lookup the non-root user
+    usr, err := user.Lookup(username)
+    if err != nil {
+        return err
+    }
+
+    // Convert UID and GID to integers
+    uid, _ := strconv.Atoi(usr.Uid)
+    gid, _ := strconv.Atoi(usr.Gid)
+
+    // Set UID and GID of the process
+    err = syscall.Setgid(gid)
+    if err != nil {
+        return err
+    }
+    err = syscall.Setuid(uid)
+    if err != nil {
+        return err
+    }
+
+    // Now run makepkg as the non-root user
+    cmd := exec.Command("makepkg", "-si", "--noconfirm")
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    return cmd.Run()
 }

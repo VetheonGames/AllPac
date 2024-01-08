@@ -173,7 +173,8 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
     }
 
     // Build the package using makepkg as the non-root user
-    cmdMakePkg := exec.Command("sudo", "-u", sudoUser, "makepkg", "-si", "--noconfirm")
+    cmdMakePkg := exec.Command("makepkg", "-si", "--noconfirm")
+    cmdMakePkg.Env = []string{"HOME=" + usr.HomeDir, "USER=" + usr.Username, "LOGNAME=" + usr.Username}
     if output, err := cmdMakePkg.CombinedOutput(); err != nil {
         logger.Errorf("error building package with makepkg: %s, %v", output, err)
         return "", fmt.Errorf("error building package with makepkg: %s, %v", output, err)
