@@ -97,7 +97,7 @@ After you run things the first time (or you run the install script), all the log
 
 ## Uninstalling AllPac
 
-To uninstall AllPac is quite simple. You simple remove the `.allpac` directory. As the directory contains all the files associated with AllPac, removing the directory will completely remove AllPac.
+To uninstall AllPac is quite simple. You just remove the `.allpac` directory. As the directory contains all the files associated with AllPac, removing the directory will completely remove AllPac.
 
 ### NOTE: UNINSTALLING AllPac WILL *NOT* UNINSTALL PACKAGES INSTALLED *BY* AllPac!
 
