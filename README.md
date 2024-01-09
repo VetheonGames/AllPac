@@ -106,7 +106,11 @@ After you run things the first time (or you run the install script), all the log
 
 ## Uninstalling AllPac
 
-To uninstall AllPac is quite simple. You just remove the `.allpac` directory. As the directory contains all the files associated with AllPac, removing the directory will completely remove AllPac.
+To uninstall AllPac is quite simple. You just run the following command (if you used the installer):
+```bash
+uninstall-allpac
+```
+Otherwise, simply delete `~/.allpac` and `/etc/profile.d/allpac.sh`
 
 ### NOTE: UNINSTALLING AllPac WILL *NOT* UNINSTALL PACKAGES INSTALLED *BY* AllPac!
 
