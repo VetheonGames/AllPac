@@ -165,9 +165,19 @@ func CloneAndInstallFromAUR(repoURL string, skipConfirmation bool) (string, erro
         return "", fmt.Errorf("error changing directory: %v", err)
     }
 
+    // Append environment variables to PKGBUILD
+    cmdAppendEnv := exec.Command("bash", "-c", "echo 'export HOME=$HOME' >> PKGBUILD && echo 'export GOCACHE=$HOME/.cache/go-build' >> PKGBUILD")
+    cmdAppendEnv.Dir = cloneDir  // Set the working directory to the cloned repository
+    if _, err := cmdAppendEnv.CombinedOutput(); err != nil {
+        logger.Errorf("error appending environment variables to PKGBUILD: %v", err)
+        return "", fmt.Errorf("error appending environment variables to PKGBUILD: %v", err)
+    }
+
     // Build the package using makepkg as the non-root user
+    env := append(os.Environ(), "HOME=" + usr.HomeDir)
     cmdMakePkg := exec.Command("makepkg", "-si", "--noconfirm")
-    cmdMakePkg.Env = []string{"PATH=" + os.Getenv("PATH")}
+    cmdMakePkg.Env = env
+    cmdMakePkg.Dir = cloneDir
     if output, err := cmdMakePkg.CombinedOutput(); err != nil {
         logger.Errorf("error building package with makepkg: %s, %v", output, err)
         return "", fmt.Errorf("error building package with makepkg: %s, %v", output, err)
