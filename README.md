@@ -13,6 +13,11 @@ curl -s -o install.sh https://git.pixelridgesoftworks.com/PixelRidge-Softworks/I
 chmod +x install.sh
 ./install.sh
 ```
+or you can use cURL:
+```bash
+curl -s https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/install.sh | bash
+```
+> **If you use `zsh` relace `bash` in the above command with `zsh`**
 
 (if you don't want to use the install script, a pre-built binary can be found [here](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/AllPac/releases), you will need to run `touch pkg.list && echo "{}" > ./pkg.list` where you want to run the binary from)
 
