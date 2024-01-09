@@ -9,7 +9,7 @@ AllPac is a command-line utility designed to simplify package management on Arch
 To install AllPac on your Arch Linux system, simply run the following commands to run the install script ([Source](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/src/branch/main/allpac)):
 
 ```bash
-curl -s -o install.sh https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/install.sh
+wget https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/raw/branch/main/allpac/install.sh
 chmod +x install.sh
 ./install.sh
 ```
