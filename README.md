@@ -5,6 +5,7 @@
 AllPac is a command-line utility designed to simplify package management on Arch Linux by combining various package managers into one cohesive tool. With AllPac, users can seamlessly interact with packages from the Snap Store, Flatpak, Pacman, and the Arch User Repository (AUR) using a single interface. This eliminates the need to juggle multiple package managers and provides a unified solution for installing, updating, uninstalling, and searching for packages.
 
 ## Installation
+### NOTE: The installer should produce ***0 Errors or Warnings***. If it does, please open an Issue and tell us!
 
 To install AllPac on your Arch Linux system, simply run the following commands to run the install script ([Source](https://git.pixelridgesoftworks.com/PixelRidge-Softworks/Installers/src/branch/main/allpac)):
 
